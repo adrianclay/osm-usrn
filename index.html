@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css"
+    integrity="sha512-hoalWLoI8r4UszCkZ5kL8vayOGVae1oxXe/2A4AO6J9+580uKHDO3JdHb7NzwwzK5xr/Fs0W40kiNHxM9vyTtQ=="
+    crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.8.0/dist/leaflet.js"
+    integrity="sha512-BB3hKbKWOc9Ez/TAwyWxNXeoV9c1v6FIeYiBieIWkpLjauysF18NzgR1MBNBXf8/KABdlkX68nAhlwcDFLGPCQ=="
+    crossorigin=""></script>
+  <style>
+    body {
+      font-family: sans-serif
+    }
+  </style>
+  <title>OpenStreetMap + Open USRN</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>Quality Assurance of OpenStreetMap using Open USRN dataset</h1>
+  <h2>Roads not in Open USRN</h2>
+  <figure>
+    <div id="map" style="height: 500px"></div>
+    <figcaption>
+      <p>
+        Highlighted are roads within OpenStreetMap which could not be matched to a feature within
+        <a href="https://www.ordnancesurvey.co.uk/business-government/products/open-usrn">Ordnance Survey Open USRN</a>
+      </p>
+    </figcaption>
+  </figure>
+  <h3>Classification examples</h3>
+  <h4>Roads which are longer than the corresponding USRN line</h4>
+  <a onClick="map.setView({lat: 51.45272994347148, lng: -0.024805068969726562}, 17); return false;" href="#">Dressington Avenue</a>
+  with <a href="https://uprn.uk/usrn/22005438" target="_blank">USRN 22005438</a> does not extend up to the Ladywell Center building.
+
+  <h4>Roads which do not exist within USRN</h4>
+  <ul>
+    <li><a onClick="map.setView({lat: 51.45627661328436, lng: -0.036714076995849616}, 17); return false;" href="#">Beecroft Lane</a></li>
+    <li><a onClick="map.setView({lat: 51.46787741280476, lng: -0.07294535636901857}, 17); return false;" href="#">Windsor Court</a></li>
+    <li><a onClick="map.setView({lat: 51.46860257372229, lng: -0.07789134979248048}, 17); return false;" href="#">Linwood Close</a></li>
+  </ul>
+
+  <h4>Roads which are the combination of multiple USRN geometries</h4>
+  <p>
+    <a onClick="map.setView({lat: 51.50047153002695, lng: -0.13154625892639163}, 17); return false;" href="#">Queen Anne's Gate</a>
+    is the combination of USRNs
+     <a href="https://uprn.uk/usrn/8401504" target="_blank">8401504</a> and
+     <a href="https://uprn.uk/usrn/8400950" target="_blank">8400950</a>.
+  </p>
+  <p>
+    <a onClick="map.setView({lat: 51.51466508392328, lng: -0.1818215847015381}, 17); return false;" href="#">
+      Cleveland Square and Cleveland Gardens</a>
+    are the combination of USRNs
+     <a href="https://uprn.uk/usrn/8400938" target="_blank">8400938</a>,
+     <a href="https://uprn.uk/usrn/8400935" target="_blank">8400935</a> and
+     <a href="https://uprn.uk/usrn/8400440" target="_blank">8400440</a>.
+  </p>
+
+  <h4>Roads which were not automatically matched</h4>
+  <a onClick="map.setView({lat: 51.50094238217541, lng: -0.1274371147155762}, 17); return false;" href="#">Parliament Square</a>
+  should be matched to USRN <a href="https://uprn.uk/usrn/8400751" target="_blank">8400751</a>, but is traced with more
+  precision within OpenStreetMap.
+
+  <h3>Ways that are considered a road</h3>
+  Any <a href="https://wiki.openstreetmap.org/wiki/Key:highway#Roads">highway value</a> listed below
+  <ul>
+    <li>motorway</li>
+    <li>trunk</li>
+    <li>primary</li>
+    <li>secondary</li>
+    <li>tertiary</li>
+    <li>unclassified</li>
+    <li>residential</li>
+    <li>motorway_link</li>
+    <li>trunk_link</li>
+    <li>primary_link</li>
+    <li>secondary_link</li>
+    <li>tertiary_link</li>
+  </ul>
+  <h2>USRNs not matched in OSM</h2>
+  <figure>
+    <div id="map2" style="height: 500px"></div>
+    <figcaption>
+      <p>
+        Highlighted are features within
+        <a href="https://www.ordnancesurvey.co.uk/business-government/products/open-usrn">Ordnance Survey Open USRN</a>
+        which could not be matched to any highway within OpenStreetMap.
+      </p>
+    </figcaption>
+  </figure>
+</body>
+<script type="application/javascript">
+var map = L.map('map').setView([51.505, -0.09], 13);
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}',
+  {foo: 'bar', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
+).addTo(map);
+fetch("unmatched_roads.geojson").then(response => response.json()).then(data => {
+  L.geoJSON(data).addTo(map);
+});
+
+var map2 = L.map('map2').setView([51.505, -0.09], 13);
+fetch("unmatched_usrns.geojson").then(response => response.json()).then(data => {
+  L.geoJSON(data, {attribution: "Contains OS data © Crown copyright and database right 2022"}).addTo(map2);
+});
+L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png?{foo}',
+  {foo: 'bar', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}
+).addTo(map2);
+</script>
+
+</html>
